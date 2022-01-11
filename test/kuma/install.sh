@@ -15,11 +15,15 @@ chmod +x ${REPO_ROOT}/bin/kumactl
 echo ">>> Installing Kuma ${KUMA_VER}"
 ${REPO_ROOT}/bin/kumactl install control-plane | kubectl apply -f -
 
+echo ">>> Waiting for Kuma Control Plane to be ready"
+kubectl wait --for condition=established crd/meshes.kuma.io
+kubectl -n kuma-system rollout status deployment/kuma-control-plane
+
 echo ">>> Installing Kuma Metrics"
 ${REPO_ROOT}/bin/kumactl install metrics | kubectl apply -f -
 
-echo ">>> Waiting for Kuma Control Plane to be ready"
-kubectl wait --for=condition=ready pod -n kuma-system -l app=kuma-control-plane
+kubectl -n kuma-metrics rollout status deployment/prometheus-server
+kubectl -n kuma-metrics get svc/prometheus-server -oyaml
 
 echo ">>> Configuring Default Kuma Mesh"
 cat <<EOF | kubectl apply -f -
