@@ -22,6 +22,11 @@ kubectl -n kuma-system rollout status deployment/kuma-control-plane
 echo ">>> Installing Kuma Metrics"
 ${REPO_ROOT}/bin/kumactl install metrics | kubectl apply -f -
 
+kubectl -n kuma-metrics delete deployment/grafana
+kubectl -n kuma-metrics delete deployment/prometheus-alertmanager
+kubectl -n kuma-metrics delete deployment/prometheus-kube-state-metrics
+kubectl -n kuma-metrics delete deployment/prometheus-pushgateway
+
 kubectl -n kuma-metrics rollout status deployment/prometheus-server
 kubectl -n kuma-metrics get svc/prometheus-server -oyaml
 

@@ -74,6 +74,8 @@ until ${ok}; do
     fi
 done
 
+kubectl -n test get svc/podinfo -oyaml
+
 echo '✔ Canary initialization test passed'
 
 passed=$(kubectl -n test get svc/podinfo -o jsonpath='{.spec.selector.app}' 2>&1 | { grep podinfo-primary || true; })
@@ -98,6 +100,9 @@ until ${ok}; do
     count=$(($count + 1))
     if [[ ${count} -eq ${retries} ]]; then
         kubectl -n kuma-system logs deployment/flagger
+        kubectl -n kuma-metrics logs deployment/prometheus-server -c prometheus-server
+        kubectl -n kuma-metrics describe deployment/prometheus-server
+        kubectl -n kuma-metrics get pods
         echo "No more retries left"
         exit 1
     fi
