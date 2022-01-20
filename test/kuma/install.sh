@@ -5,13 +5,13 @@ set -o errexit
 KUMA_VER="1.4.1"
 REPO_ROOT=$(git rev-parse --show-toplevel)
 KUSTOMIZE_VERSION=3.8.2
-# mkdir -p ${REPO_ROOT}/bin
+mkdir -p ${REPO_ROOT}/bin
 
-# echo ">>> Downloading Kuma ${KUMA_VER}"
-# curl -SsL https://download.konghq.com/mesh-alpine/kuma-${KUMA_VER}-ubuntu-amd64.tar.gz -o kuma-${KUMA_VER}.tar.gz
-# tar xvzf kuma-${KUMA_VER}.tar.gz
-# cp kuma-${KUMA_VER}/bin/kumactl ${REPO_ROOT}/bin/kumactl
-# chmod +x ${REPO_ROOT}/bin/kumactl
+echo ">>> Downloading Kuma ${KUMA_VER}"
+curl -SsL https://download.konghq.com/mesh-alpine/kuma-${KUMA_VER}-ubuntu-amd64.tar.gz -o kuma-${KUMA_VER}.tar.gz
+tar xvzf kuma-${KUMA_VER}.tar.gz
+cp kuma-${KUMA_VER}/bin/kumactl ${REPO_ROOT}/bin/kumactl
+chmod +x ${REPO_ROOT}/bin/kumactl
 
 echo ">>> Installing Kuma ${KUMA_VER}"
 ${REPO_ROOT}/bin/kumactl install control-plane | kubectl apply -f -
