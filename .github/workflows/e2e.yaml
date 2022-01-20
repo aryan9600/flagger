@@ -16,18 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         provider:
-          # service mesh
-          - istio
-          - linkerd
-          - osm
+          # - istio
+          # - linkerd
+          # - contour
+          # - nginx
+          # - traefik
+          # - gloo
+          # - skipper
+          # - osm
           - kuma
-          # ingress controllers
-          - contour
-          - nginx
-          - traefik
-          - gloo
-          - skipper
-          - kubernetes
+          # - kubernetes
     steps:
       - name: Checkout
         uses: actions/checkout@v2
