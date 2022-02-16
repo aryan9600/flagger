@@ -20,17 +20,17 @@ jobs:
       matrix:
         provider:
           # service mesh
-          - istio
-          - linkerd
-          - osm
-          - kuma
+          # - istio
+          # - linkerd
+          # - osm
+          # - kuma
           # ingress controllers
-          - contour
-          - nginx
-          - traefik
-          - gloo
-          - skipper
-          - kubernetes
+          # - contour
+          # - nginx
+          # - traefik
+          # - gloo
+          # - skipper
+          # - kubernetes
           - gatewayapi
     steps:
       - name: Checkout
@@ -44,6 +44,9 @@ jobs:
         run: |
           docker build -t test/flagger:latest .
           kind load docker-image test/flagger:latest
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 60
       - name: Run tests
         run: |
           ./test/${{ matrix['provider'] }}/run.sh
