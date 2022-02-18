@@ -44,8 +44,8 @@ jobs:
         run: |
           docker build -t test/flagger:latest .
           kind load docker-image test/flagger:latest
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+        # uses: mxschmitt/action-tmate@v3
         timeout-minutes: 60
       - name: Run tests
         run: |
