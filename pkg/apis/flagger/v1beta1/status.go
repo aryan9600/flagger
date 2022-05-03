@@ -56,6 +56,9 @@ const (
 	// CanaryPhaseSucceeded means the canary analysis has been successful
 	// and the canary deployment has been promoted
 	CanaryPhaseSucceeded CanaryPhase = "Succeeded"
+	// CanaryPhaseRollingBack means the canary analysis failed and the traffic is being shifted
+	// back to the primary.
+	CanaryPhaseRollingBack CanaryPhase = "RollingBack"
 	// CanaryPhaseFailed means the canary analysis failed
 	// and the canary deployment has been scaled to zero
 	CanaryPhaseFailed CanaryPhase = "Failed"

@@ -230,6 +230,14 @@ type CanaryAnalysis struct {
 	// +optional
 	StepWeights []int `json:"stepWeights,omitempty"`
 
+	// Decremental traffic weight step during rollback
+	// +optional
+	RollbackWeight int `json:"rollbackWeight,omitempty"`
+
+	// +optional
+	// Interval to wait before increasing the weight to primary by RollbackWeight
+	RollbackInterval *metav1.Duration `json:"rollbackInterval,omitempty"`
+
 	// Incremental traffic weight step for promotion phase
 	// +optional
 	StepWeightPromotion int `json:"stepWeightPromotion,omitempty"`

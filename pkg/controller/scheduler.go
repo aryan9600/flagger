@@ -235,6 +235,8 @@ func (c *Controller) advanceCanary(name string, namespace string) {
 		return
 	}
 
+	fmt.Printf("advance: %t", shouldAdvance)
+
 	if !shouldAdvance {
 		c.recorder.SetStatus(cd, cd.Status.Phase)
 		return
@@ -758,6 +760,10 @@ func (c *Controller) shouldAdvance(canary *flaggerv1.Canary, canaryController ca
 		return true, nil
 	}
 
+	if canary.Status.Phase == flaggerv1.CanaryPhaseRollingBack {
+		return false, nil
+	}
+
 	// Make sure to sync lastAppliedSpec even if the canary is in a failed state.
 	if canary.Status.Phase == flaggerv1.CanaryPhaseFailed {
 		if err := canaryController.SyncStatus(canary, canary.Status); err != nil {
@@ -853,35 +859,78 @@ func (c *Controller) rollback(canary *flaggerv1.Canary, canaryController canary.
 			false, flaggerv1.SeverityError)
 	}
 
-	// route all traffic back to primary
-	primaryWeight := c.totalWeight(canary)
-	canaryWeight := 0
-	if err := meshRouter.SetRoutes(canary, primaryWeight, canaryWeight, false); err != nil {
-		c.recordEventWarningf(canary, "%v", err)
-		return
+	failCanary := func() {
+		canaryPhaseFailed := canary.DeepCopy()
+		canaryPhaseFailed.Status.Phase = flaggerv1.CanaryPhaseFailed
+		c.recordEventWarningf(canaryPhaseFailed, "Canary failed! Scaling down %s.%s",
+			canaryPhaseFailed.Name, canaryPhaseFailed.Namespace)
+
+		// shutdown canary
+		if err := canaryController.ScaleToZero(canary); err != nil {
+			c.recordEventWarningf(canary, "%v", err)
+			return
+		}
+
+		// mark canary as failed
+		if err := canaryController.SyncStatus(canary, flaggerv1.CanaryStatus{Phase: flaggerv1.CanaryPhaseFailed, CanaryWeight: 0}); err != nil {
+			c.logger.With("canary", fmt.Sprintf("%s.%s", canary.Name, canary.Namespace)).Errorf("%v", err)
+			return
+		}
+
+		c.recorder.SetStatus(canary, flaggerv1.CanaryPhaseFailed)
+		c.runPostRolloutHooks(canary, flaggerv1.CanaryPhaseFailed)
 	}
 
-	canaryPhaseFailed := canary.DeepCopy()
-	canaryPhaseFailed.Status.Phase = flaggerv1.CanaryPhaseFailed
-	c.recordEventWarningf(canaryPhaseFailed, "Canary failed! Scaling down %s.%s",
-		canaryPhaseFailed.Name, canaryPhaseFailed.Namespace)
+	go func() {
+		if canary.Spec.Analysis.RollbackInterval != nil && canary.Spec.Analysis.RollbackWeight != 0 {
+			for {
+				pWeight, cWeight, _, err := meshRouter.GetRoutes(canary)
+				fmt.Println("start", pWeight, cWeight)
+				if err != nil {
+					return
+				}
+				if cWeight > 0 {
+					pWeight += canary.Spec.Analysis.RollbackWeight
+					cWeight -= canary.Spec.Analysis.RollbackWeight
+					if pWeight > 100 {
+						pWeight = c.totalWeight(canary)
+					}
+					if cWeight < 0 {
+						cWeight = 0
+					}
+					if err := meshRouter.SetRoutes(canary, pWeight, cWeight, false); err != nil {
+						c.recordEventWarningf(canary, "%v", err)
+						return
+					}
+					if err := canaryController.SyncStatus(
+						canary,
+						flaggerv1.CanaryStatus{Phase: flaggerv1.CanaryPhaseRollingBack, CanaryWeight: cWeight},
+					); err != nil {
+						c.logger.With("canary", fmt.Sprintf("%s.%s", canary.Name, canary.Namespace)).Errorf("%v", err)
+						return
+					}
+					c.recorder.SetWeight(canary, pWeight, cWeight)
 
-	c.recorder.SetWeight(canary, primaryWeight, canaryWeight)
-
-	// shutdown canary
-	if err := canaryController.ScaleToZero(canary); err != nil {
-		c.recordEventWarningf(canary, "%v", err)
-		return
-	}
-
-	// mark canary as failed
-	if err := canaryController.SyncStatus(canary, flaggerv1.CanaryStatus{Phase: flaggerv1.CanaryPhaseFailed, CanaryWeight: 0}); err != nil {
-		c.logger.With("canary", fmt.Sprintf("%s.%s", canary.Name, canary.Namespace)).Errorf("%v", err)
-		return
-	}
-
-	c.recorder.SetStatus(canary, flaggerv1.CanaryPhaseFailed)
-	c.runPostRolloutHooks(canary, flaggerv1.CanaryPhaseFailed)
+					fmt.Println("updated", cWeight, pWeight)
+					if cWeight == 0 && pWeight == c.totalWeight(canary) {
+						failCanary()
+						break
+					}
+				}
+				fmt.Println("sleeping")
+				time.Sleep(canary.Spec.Analysis.RollbackInterval.Duration)
+			}
+		} else {
+			// route all traffic back to primary
+			primaryWeight := c.totalWeight(canary)
+			canaryWeight := 0
+			if err := meshRouter.SetRoutes(canary, primaryWeight, canaryWeight, false); err != nil {
+				c.recordEventWarningf(canary, "%v", err)
+				return
+			}
+			failCanary()
+		}
+	}()
 }
 
 func (c *Controller) setPhaseInitializing(cd *flaggerv1.Canary) error {
