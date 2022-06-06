@@ -48,4 +48,7 @@ jobs:
           # kind load docker-image test/flagger:latest
       - name: Run tests
         run: |
+          ./test/osm/install.sh
+      - name: sleep
+        run: |
           sleep 1000000
