@@ -20,5 +20,5 @@ ${REPO_ROOT}/bin/linux-amd64/osm version
 echo '>>> Installing Flagger'
 kubectl apply -k ${REPO_ROOT}/kustomize/osm
 
-kubectl -n osm-system set image deployment/flagger flagger=test/flagger:latest
+# kubectl -n osm-system set image deployment/flagger flagger=test/flagger:latest
 kubectl -n osm-system rollout status deployment/flagger
