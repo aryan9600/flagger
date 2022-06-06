@@ -14,14 +14,14 @@ echo ">>> Installing Open Service Mesh ${OSM_VER}"
 ${REPO_ROOT}/bin/linux-amd64/osm install \
 --set=osm.deployPrometheus=true \
 --set=osm.enablePermissiveTrafficPolicy=true \
---set=osm.osmController.resource.limits.cpu=200m \
---set=osm.osmController.resource.requests.cpu=200m \
---set=osm.prometheus.resources.limits.cpu=200m \
---set=osm.prometheus.resources.requests.cpu=200m \
---set=osm.injector.resource.limits.cpu=200m \
---set=osm.injector.resource.requests.cpu=200m \
---set=osm.osmBootstrap.resource.limits.cpu=200m \
---set=osm.osmBootstrap.resource.requests.cpu=200m
+--set=osm.osmController.resource.limits.cpu=250m \
+--set=osm.osmController.resource.requests.cpu=250m \
+--set=osm.prometheus.resources.limits.cpu=250m \
+--set=osm.prometheus.resources.requests.cpu=250m \
+--set=osm.injector.resource.limits.cpu=250m \
+--set=osm.injector.resource.requests.cpu=250m \
+--set=osm.osmBootstrap.resource.limits.cpu=250m \
+--set=osm.osmBootstrap.resource.requests.cpu=250m
 
 ${REPO_ROOT}/bin/linux-amd64/osm version
 
