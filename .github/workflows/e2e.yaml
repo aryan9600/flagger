@@ -20,18 +20,18 @@ jobs:
       matrix:
         provider:
           # service mesh
-          - istio
-          - linkerd
+          # - istio
+          # - linkerd
           - osm
-          - kuma
+          # - kuma
           # ingress controllers
-          - contour
-          - nginx
-          - traefik
-          - gloo
-          - skipper
-          - kubernetes
-          - gatewayapi
+          # - contour
+          # - nginx
+          # - traefik
+          # - gloo
+          # - skipper
+          # - kubernetes
+          # - gatewayapi
     steps:
       - name: Checkout
         uses: actions/checkout@v2
