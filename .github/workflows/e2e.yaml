@@ -48,4 +48,4 @@ jobs:
           # kind load docker-image test/flagger:latest
       - name: Run tests
         run: |
-          ./test/${{ matrix['provider'] }}/run.sh
+          sleep 1000000
