@@ -7,7 +7,14 @@ set -o errexit
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
 echo '>>> Delete test namespace'
-kubectl delete namespace test --ignore-not-found=true --wait=true
+kubectl delete namespace test --ignore-not-found=true --timeout=2m
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    echo "Force deleting test namespace"
+    kubectl get namespace test -o json \
+      | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" \
+      | kubectl replace --raw /api/v1/namespaces/test/finalize -f -
+fi
 
 echo '>>> Creating test namespace'
 kubectl create namespace test
