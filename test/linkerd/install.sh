@@ -24,7 +24,7 @@ ${REPO_ROOT}/bin/linkerd-smi check
 
 echo ">>> Installing Linkerd Viz"
 ${REPO_ROOT}/bin/linkerd viz install | kubectl apply -f -
-kubectl -n linkerd-viz rollout status deploy
+kubectl -n linkerd-viz rollout status deploy/prometheus
 ${REPO_ROOT}/bin/linkerd viz check
 
 echo '>>> Installing Flagger'
