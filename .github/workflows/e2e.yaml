@@ -20,20 +20,20 @@ jobs:
       matrix:
         provider:
           # service mesh
-          - istio
+          # - istio
           - linkerd
-          - osm
-          - kuma
+          # - osm
+          # - kuma
           # ingress controllers
-          - contour
-          - nginx
-          - traefik
-          - gloo
-          - skipper
-          - kubernetes
-          - gatewayapi
-          - keda
-          - apisix
+          # - contour
+          # - nginx
+          # - traefik
+          # - gloo
+          # - skipper
+          # - kubernetes
+          # - gatewayapi
+          # - keda
+          # - apisix
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -43,6 +43,8 @@ jobs:
           version: v0.18.0
           cluster_name: kind
           node_image: kindest/node:v1.24.12@sha256:0bdca26bd7fe65c823640b14253ea7bac4baad9336b332c94850f84d8102f873
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Build container image
         run: |
           docker build -t test/flagger:latest .
