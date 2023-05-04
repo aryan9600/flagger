@@ -30,6 +30,7 @@ kubectl -n linkerd-viz scale deploy web --replicas=0
 kubectl -n linkerd-viz scale deploy tap --replicas=0
 kubectl -n linkerd-viz scale deploy tap-injector --replicas=0
 kubectl -n linkerd-viz scale deploy metrics-api --replicas=0
+kubectl delete apiservices v1alpha1.tap.linkerd.io
 
 echo '>>> Installing Flagger'
 kubectl apply -k ${REPO_ROOT}/kustomize/linkerd
