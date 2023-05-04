@@ -26,6 +26,10 @@ echo ">>> Installing Linkerd Viz"
 ${REPO_ROOT}/bin/linkerd viz install | kubectl apply -f -
 kubectl -n linkerd-viz rollout status deploy/prometheus
 ${REPO_ROOT}/bin/linkerd viz check
+kubectl -n linkerd-viz scale deploy web --replicas=0
+kubectl -n linkerd-viz scale deploy tap --replicas=0
+kubectl -n linkerd-viz scale deploy tap-injector --replicas=0
+kubectl -n linkerd-viz scale deploy metrics-api --replicas=0
 
 echo '>>> Installing Flagger'
 kubectl apply -k ${REPO_ROOT}/kustomize/linkerd
