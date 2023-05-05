@@ -11,7 +11,6 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 kubectl -n test delete ds podinfo-ds
 "$DIR"/test-canary.sh
 
-sleep 100000000
 "$REPO_ROOT"/test/workloads/init.sh
 kubectl -n test delete ds podinfo-ds
 "$DIR"/test-steps.sh
